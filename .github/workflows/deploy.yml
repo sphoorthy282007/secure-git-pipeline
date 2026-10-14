@@ -1,0 +1,33 @@
+name: Secure Helm Deployment
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Kubernetes credentials
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBE_CONFIG" > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install myapp ./helm/myapp             --set image.repository=YOUR_DOCKERHUB_USERNAME/myapp             --set-string image.tag="$GITHUB_SHA"
+
+      - name: Cleanup credentials
+        if: always()
+        run: rm -f "$HOME/.kube/config"
