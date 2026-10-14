@@ -1,4 +1,3 @@
-```yaml
 name: Build and Push Docker Image
 
 on:
@@ -6,9 +5,14 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -26,4 +30,3 @@ jobs:
           context: .
           push: true
           tags: kncsphoorthy/myapp:${{ github.sha }}
-```
